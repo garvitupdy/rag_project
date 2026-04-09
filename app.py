@@ -8,14 +8,14 @@ from vector_db_manager import VectorDBManager
 
 load_dotenv()
 
-# Page configuration
+
 st.set_page_config(
     page_title="PDF Q&A Assistant",
     page_icon="📚",
     layout="wide"
 )
 
-# Initialize session state
+
 if 'vectorstore' not in st.session_state:
     st.session_state.vectorstore = None
 if 'chat_history' not in st.session_state:
@@ -27,15 +27,15 @@ if 'current_pdf_metadata' not in st.session_state:
 if 'db_manager' not in st.session_state:
     st.session_state.db_manager = VectorDBManager()
 
-# Title
+
 st.title("📚 PDF Q&A Assistant")
 st.markdown("Upload a PDF and ask questions about its content!")
 
-# Sidebar
+
 with st.sidebar:
     st.header("📄 PDF Management")
     
-    # Show all processed PDFs
+ 
     all_pdfs = st.session_state.db_manager.list_all_pdfs()
     
     if all_pdfs:
@@ -71,7 +71,7 @@ with st.sidebar:
         
         st.markdown("---")
     
-    # Upload new PDF
+    
     st.subheader("➕ Add New PDF")
     uploaded_file = st.file_uploader("Choose a PDF file", type=['pdf'])
     
@@ -82,31 +82,30 @@ with st.sidebar:
                     pdf_content = uploaded_file.getvalue()
                     pdf_hash = st.session_state.db_manager.get_pdf_hash(pdf_content)
                     
-                    # Check if already exists
+
                     if st.session_state.db_manager.pdf_exists(pdf_hash):
                         st.info("📋 This PDF is already in your library! Loading it...")
                         vectorstore = st.session_state.db_manager.load_vectorstore(pdf_hash)
                         metadata = st.session_state.db_manager.get_metadata(pdf_hash)
                     else:
-                        # Save to temporary file for processing
+                      
                         with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
                             tmp_file.write(pdf_content)
                             tmp_path = tmp_file.name
                         
-                        # Process PDF
+
                         pdf_hash, metadata = st.session_state.db_manager.process_pdf(
                             tmp_path, pdf_content, uploaded_file.name
                         )
                         
-                        # Load vectorstore
+
                         vectorstore = st.session_state.db_manager.load_vectorstore(pdf_hash)
-                        
-                        # Clean up temp file
+
                         os.unlink(tmp_path)
                         
                         st.success("✅ PDF processed and saved!")
                     
-                    # Set as current
+
                     st.session_state.vectorstore = vectorstore
                     st.session_state.current_pdf_hash = pdf_hash
                     st.session_state.current_pdf_metadata = metadata
@@ -117,7 +116,7 @@ with st.sidebar:
                 except Exception as e:
                     st.error(f"Error: {str(e)}")
     
-    # Show current PDF
+
     st.markdown("---")
     if st.session_state.current_pdf_metadata:
         st.success("📖 **Current PDF:**")
@@ -127,10 +126,10 @@ with st.sidebar:
     else:
         st.warning("⚠️ No PDF loaded")
 
-# Main chat interface
+
 if st.session_state.vectorstore is not None:
     
-    # Display chat history
+
     if st.session_state.chat_history:
         st.markdown("### 💬 Chat History")
         for i, (question, answer) in enumerate(st.session_state.chat_history):
@@ -139,7 +138,7 @@ if st.session_state.vectorstore is not None:
                 st.markdown(f"**AI:** {answer}")
                 st.markdown("---")
     
-    # Question input
+    
     st.markdown("### ❓ Ask a Question")
     
     with st.form(key="question_form", clear_on_submit=True):
@@ -153,7 +152,6 @@ if st.session_state.vectorstore is not None:
         if submit_button and user_question:
             with st.spinner("Thinking..."):
                 try:
-                    # Create retriever
                     retriever = st.session_state.vectorstore.as_retriever(
                         search_type="mmr",
                         search_kwargs={
@@ -163,13 +161,13 @@ if st.session_state.vectorstore is not None:
                         }
                     )
                     
-                    # Retrieve relevant documents
+
                     docs = retriever.invoke(user_question)
                     
-                    # Create context
+
                     context = "\n\n".join([doc.page_content for doc in docs])
                     
-                    # Create prompt
+
                     prompt = ChatPromptTemplate.from_messages([
                         (
                             "system",
@@ -192,10 +190,10 @@ Question:
                         )
                     ])
                     
-                    # Initialize LLM
+
                     llm = ChatMistralAI(model="mistral-small-2506")
                     
-                    # Generate response
+
                     final_prompt = prompt.invoke({
                         "context": context,
                         "question": user_question
@@ -204,10 +202,10 @@ Question:
                     response = llm.invoke(final_prompt)
                     answer = response.content
                     
-                    # Add to chat history
+
                     st.session_state.chat_history.append((user_question, answer))
                     
-                    # Rerun to update display
+
                     st.rerun()
                     
                 except Exception as e:
@@ -224,7 +222,7 @@ else:
     - Explain [specific concept] mentioned in the document
     """)
 
-# Footer
+
 st.markdown("---")
 st.markdown(
     "<div style='text-align: center; color: gray;'>Powered by LangChain, OpenAI, Mistral AI & Streamlit</div>",
