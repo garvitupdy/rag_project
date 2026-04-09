@@ -81,23 +81,23 @@ class VectorDBManager:
         """
         pdf_hash = self.get_pdf_hash(pdf_content)
         
-        # Check if already processed
+
         if self.pdf_exists(pdf_hash):
             metadata = self.get_metadata(pdf_hash)
             return pdf_hash, metadata
         
-        # Load PDF
+
         loader = PyPDFLoader(pdf_path)
         docs = loader.load()
         
-        # Split documents
+       
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200
         )
         chunks = splitter.split_documents(docs)
         
-        # Create vector store
+
         db_path = self.get_db_path(pdf_hash)
         vectorstore = Chroma.from_documents(
             documents=chunks,
@@ -105,7 +105,7 @@ class VectorDBManager:
             persist_directory=str(db_path)
         )
         
-        # Save metadata
+
         metadata = {
             'hash': pdf_hash,
             'filename': filename,
@@ -135,7 +135,7 @@ class VectorDBManager:
             import shutil
             shutil.rmtree(db_path)
             
-            # Update metadata file
+
             if self.metadata_file.exists():
                 lines = []
                 with open(self.metadata_file, 'r') as f:
