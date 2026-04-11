@@ -1,0 +1,42 @@
+# Core API clients
+groq
+mistralai
+
+# Environment & config
+python-dotenv
+
+# HTTP & async handling
+requests
+httpx
+aiohttp
+
+# Data handling
+numpy
+pandas
+
+# Tokenization (useful for LLMs)
+tiktoken
+
+# LLM frameworks (optional but powerful)
+langchain
+langchain-community
+
+# Vector DB / embeddings (optional)
+faiss-cpu
+chromadb
+sentence-transformers
+# App frameworks (choose based on use case)
+streamlit
+fastapi
+uvicorn
+
+# Pydantic for FastAPI / data validation
+pydantic
+
+# Logging & utilities
+loguru
+tqdm
+
+# Jupyter (for experimentation)
+notebook
+ipykernel
